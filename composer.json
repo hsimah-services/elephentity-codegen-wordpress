@@ -1,0 +1,44 @@
+{
+    "name": "elephentity/codegen-wordpress",
+    "description": "The WordPress builder for Elephentity: compiles the IR into the physical schema WordPress needs. Build-time only.",
+    "type": "library",
+    "license": "MIT",
+    "require": {
+        "php": ">=8.3",
+        "symfony/yaml": "^7.0 || ^8.0"
+    },
+    "require-dev": {
+        "friendsofphp/php-cs-fixer": "^3.64",
+        "phpstan/phpstan": "^2.0",
+        "phpunit/phpunit": "^11.0 || ^12.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Eleph\\Gen\\WordPress\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Eleph\\Gen\\WordPress\\Tests\\": "tests/"
+        }
+    },
+    "bin": [
+        "bin/eleph-gen-wordpress"
+    ],
+    "scripts": {
+        "test": "phpunit",
+        "stan": "phpstan analyse --memory-limit=1G",
+        "style": "php-cs-fixer fix --dry-run --diff",
+        "style:fix": "php-cs-fixer fix",
+        "ci": [
+            "@style",
+            "@stan",
+            "@test"
+        ]
+    },
+    "config": {
+        "sort-packages": true
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true
+}
