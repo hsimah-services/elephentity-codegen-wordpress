@@ -2,7 +2,7 @@
     "name": "elephentity/codegen-wordpress",
     "description": "The WordPress builder for Elephentity: compiles the IR into the physical schema WordPress needs. Build-time only.",
     "type": "library",
-    "license": "MIT",
+    "license": "Apache-2.0",
     "require": {
         "php": ">=8.3",
         "symfony/yaml": "^7.0 || ^8.0"
