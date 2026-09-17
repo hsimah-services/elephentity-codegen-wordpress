@@ -1,0 +1,7 @@
+/**
+ * The compiled taxonomies.
+ *
+ * Loaded at boot and handed to `register_taxonomy()` as-is. Deriving these at run
+ * time meant compiling the spec on every request, which is the cost every
+ * manifest here exists to remove.
+ */
