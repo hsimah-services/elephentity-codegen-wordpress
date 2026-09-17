@@ -62,7 +62,7 @@ final class GoldenTest extends TestCase
 
         self::assertSame(
             $result['stdout'],
-            (string) json_encode(json_decode($result['stdout'], true, 512, JSON_THROW_ON_ERROR), JSON_UNESCAPED_SLASHES),
+            (string) json_encode(json_decode($result['stdout'], true, 512, JSON_THROW_ON_ERROR), JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE),
         );
     }
 
@@ -155,7 +155,7 @@ final class GoldenTest extends TestCase
     private function invoke(string $input): array
     {
         $process = proc_open(
-            [PHP_BINARY, dirname(__DIR__) . '/bin/eleph-gen-wordpress'],
+            [getenv('ELEPH_BUILDER_BINARY') ?: dirname(__DIR__) . '/bin/eleph-gen-wordpress'],
             [0 => ['pipe', 'r'], 1 => ['pipe', 'w'], 2 => ['pipe', 'w']],
             $pipes,
         );

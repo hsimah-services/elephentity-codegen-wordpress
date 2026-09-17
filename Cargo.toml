@@ -1,0 +1,15 @@
+[package]
+name = "elephentity-codegen-wordpress"
+version = "0.1.0"
+edition = "2021"
+license = "Apache-2.0"
+description = "Elephentity wordpress manifest builder"
+
+[[bin]]
+name = "eleph-gen-wordpress"
+path = "rust/main.rs"
+
+[dependencies]
+serde_json = { version = "1", features = ["preserve_order"] }
+serde = { version = "1", features = ["derive"] }
+indexmap = { version = "2", features = ["serde"] }

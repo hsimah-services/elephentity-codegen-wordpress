@@ -1,0 +1,6 @@
+/**
+ * The compiled physical schema.
+ *
+ * Loaded at boot and handed to the adaptor as-is. Nothing here is worked out
+ * per request; the spec decided all of it.
+ */
