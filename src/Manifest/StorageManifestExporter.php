@@ -58,6 +58,9 @@ final readonly class StorageManifestExporter
                     accounts: [
                 %s
                     ],
+                    posts: [
+                %s
+                    ],
                 );
 
                 PHP,
@@ -75,6 +78,7 @@ final readonly class StorageManifestExporter
             $this->taxonomies($manifest),
             $this->taxonomyPlacements($manifest),
             $this->accounts($manifest),
+            implode("\n", array_map(static fn (string $entity, string $slug): string => sprintf('        %s => %s,', var_export($entity, true), var_export($slug, true)), array_keys($manifest->posts), array_values($manifest->posts))),
         );
     }
 

@@ -8,6 +8,7 @@ use Eleph\Gen\WordPress\Ir\EntityDefinition;
 use Eleph\Gen\WordPress\Ir\FieldDefinition;
 use Eleph\Gen\WordPress\Ir\Primitive;
 use Eleph\Gen\WordPress\Ir\Schema;
+use Eleph\Gen\WordPress\Manifest\WordPressSettings;
 use Eleph\Gen\WordPress\Storage\RelationKind;
 use RuntimeException;
 
@@ -74,6 +75,10 @@ final readonly class SchemaBuilder
     {
         $table = $this->naming->table($entity->storage->table);
 
+        if (WordPressSettings::enabled($schema, $entity, 'linkPosts') && null === $entity->storage->handle) {
+            throw new RuntimeException(sprintf('Entity %s enables WordPress post linking but has no storage.handle.', $entity->name));
+        }
+
         // Every entity has an implicit id. Auto-increment for now: WordPress-standard
         // and unblocking, at the cost of not knowing an id before insert.
         $columns = [
@@ -81,6 +86,12 @@ final readonly class SchemaBuilder
         ];
 
         $indexes = [];
+
+        if (WordPressSettings::linked($schema, $entity)) {
+            $columns['wp_post_id'] = new Column('wp_post_id', 'BIGINT UNSIGNED', nullable: true);
+            $index = new Index($this->naming->uniqueName($table, 'wp_post_id'), ['wp_post_id'], unique: true);
+            $indexes[$index->name] = $index;
+        }
 
         foreach ($entity->fields as $field) {
             $name = $this->naming->column($field->name);

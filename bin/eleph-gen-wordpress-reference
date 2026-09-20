@@ -4,6 +4,7 @@
 declare(strict_types=1);
 
 use Eleph\Gen\WordPress\Manifest\PostTypeManifestBuilder;
+use Eleph\Gen\WordPress\Manifest\AdminGenerator;
 use Eleph\Gen\WordPress\Manifest\PostTypeManifestExporter;
 use Eleph\Gen\WordPress\Manifest\StorageManifestBuilder;
 use Eleph\Gen\WordPress\Manifest\StorageManifestExporter;
@@ -99,6 +100,7 @@ try {
             'drivers' => [DRIVER],
             'patterns' => patterns(),
             'storage' => storageRules(),
+            'integrations' => json_decode((string) file_get_contents(__DIR__ . '/../rust/provides.json'), false, 512, JSON_THROW_ON_ERROR)->integrations,
         ])));
 
         exit(0);
@@ -127,6 +129,10 @@ try {
             ),
         ]
         : [];
+
+    if (DRIVER === $schema->project->driver) {
+        $files = [...$files, ...(new AdminGenerator())->generate($schema)];
+    }
 
     $errors = DRIVER === $schema->project->driver ? [] : [sprintf(
         'This project declares driver "%s", so the wordpress target has nothing to generate. '

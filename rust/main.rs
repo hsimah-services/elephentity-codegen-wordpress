@@ -1,3 +1,4 @@
+mod admin;
 mod ir;
 mod registration;
 mod storage;
@@ -44,6 +45,25 @@ fn taxonomy(e: &Value) -> bool {
 }
 fn account(e: &Value) -> bool {
     b(&e["config"]["account"])
+}
+fn setting(schema: &Value, e: &Value, key: &str) -> bool {
+    e["integrations"]["wordpress"][key]
+        .as_bool()
+        .or_else(|| schema["project"]["integrations"]["wordpress"][key].as_bool())
+        .unwrap_or(key == "adminTemplates")
+}
+fn linked(schema: &Value, e: &Value) -> bool {
+    !taxonomy(e)
+        && !account(e)
+        && e["storage"]["driver"] == "wordpress"
+        && e["storage"]["handle"].as_str().is_some()
+        && setting(schema, e, "linkPosts")
+}
+fn admin_enabled(schema: &Value, e: &Value) -> bool {
+    !taxonomy(e)
+        && !account(e)
+        && setting(schema, e, "adminTemplates")
+        && e["config"]["showInAdmin"].as_bool().unwrap_or(true)
 }
 fn response(files: Vec<Value>, errors: Vec<String>) -> Value {
     json!({"elephentity":1,"irVersion":"1.1","headerStyle":"php","extensions":["php"],"files":files,"errors":errors})
@@ -93,14 +113,13 @@ fn run(v: &Value) -> Result<Value> {
         Ok(body) => body,
         Err(e) => return Ok(response(vec![], vec![e])),
     };
-    Ok(response(
-        vec![
-            json!({"path":"storage-manifest.php","body":storage}),
-            json!({"path":"post-types.php","body":registration::generate(schema,false)}),
-            json!({"path":"taxonomies.php","body":registration::generate(schema,true)}),
-        ],
-        vec![],
-    ))
+    let mut files = vec![
+        json!({"path":"storage-manifest.php","body":storage}),
+        json!({"path":"post-types.php","body":registration::generate(schema,false)}),
+        json!({"path":"taxonomies.php","body":registration::generate(schema,true)}),
+    ];
+    files.extend(admin::generate(schema));
+    Ok(response(files, vec![]))
 }
 fn main() {
     let mut input = String::new();

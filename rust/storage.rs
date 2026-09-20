@@ -101,12 +101,25 @@ pub fn generate(schema: &Value) -> Result<String> {
         let en = s(&e["name"]);
         let table = s(&e["storage"]["table"]);
         if !taxonomy(e) && !account(e) {
+            if setting(schema, e, "linkPosts") && e["storage"]["handle"].as_str().is_none() {
+                return Err(format!(
+                    "Entity {en} enables WordPress post linking but has no storage.handle."
+                ));
+            }
             let mut t = Table {
                 name: table.into(),
                 columns: vec![("id".into(), column("id", "BIGINT UNSIGNED", false, true))],
                 indexes: vec![],
                 primary: "id".into(),
             };
+            if linked(schema, e) {
+                t.columns.push((
+                    "wp_post_id".into(),
+                    column("wp_post_id", "BIGINT UNSIGNED", true, false),
+                ));
+                t.indexes
+                    .push(index(table, "wp_post_id", &["wp_post_id".into()], true));
+            }
             for f in vals(&e["fields"]) {
                 let n = snake(s(&f["name"]));
                 if t.columns.iter().any(|(k, _)| k == &n) {
@@ -229,12 +242,16 @@ pub fn generate(schema: &Value) -> Result<String> {
     let mut columns = BTreeMap::new();
     let mut taxonomies = BTreeMap::new();
     let mut accounts = BTreeMap::new();
+    let mut posts = BTreeMap::new();
     let claimed = entities
         .iter()
         .map(|e| s(&e["storage"]["table"]))
         .collect::<Vec<_>>();
     for e in &entities {
         let en = s(&e["name"]);
+        if linked(schema, e) {
+            posts.insert(en.to_owned(), q(s(&e["storage"]["handle"])));
+        }
         if let Some(t) = tables.get(s(&e["storage"]["table"])) {
             entity_tables.insert(en.to_owned(), table_expr(t));
         }
@@ -291,6 +308,7 @@ pub fn generate(schema: &Value) -> Result<String> {
         ("taxonomies", taxonomies.into_iter().collect()),
         ("taxonomyPlacements", tax_places),
         ("accounts", accounts.into_iter().collect()),
+        ("posts", posts.into_iter().collect()),
     ] {
         body.push_str(&format!("    {n}: [\n{}\n    ],\n", pairs(&entries, 8)));
     }

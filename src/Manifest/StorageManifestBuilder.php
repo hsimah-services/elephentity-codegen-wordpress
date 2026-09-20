@@ -54,8 +54,13 @@ final readonly class StorageManifestBuilder
 
         $taxonomies = [];
         $accounts = [];
+        $posts = [];
 
         foreach ($schema->entities as $entity) {
+            if (WordPressSettings::linked($schema, $entity)) {
+                $posts[$entity->name] = (string) $entity->storage->handle;
+            }
+
             if (EdgePlanner::isTaxonomy($entity)) {
                 $taxonomies[$entity->name] = (string) $entity->storage->handle;
             }
@@ -72,6 +77,7 @@ final readonly class StorageManifestBuilder
         ksort($joinTables);
         ksort($taxonomies);
         ksort($accounts);
+        ksort($posts);
 
         return new StorageManifest(
             $byEntity,
@@ -81,6 +87,7 @@ final readonly class StorageManifestBuilder
             $taxonomies,
             $planner->planTaxonomies($schema),
             $accounts,
+            $posts,
         );
     }
 
