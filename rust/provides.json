@@ -32,5 +32,51 @@
             "maxLength": 20,
             "pattern": "/^[a-z][a-z0-9_-]*$/"
         }
+    },
+    "integrations": {
+        "wordpress": {
+            "description": "WordPress admin views and optional linked posts; entity identity and relationships remain in Elephentity.",
+            "projectConfig": {
+                "adminTemplates": {
+                    "type": "bool",
+                    "description": "Generate admin list and detail templates.",
+                    "of": null,
+                    "values": null,
+                    "nullable": false,
+                    "default": true,
+                    "hasDefault": true
+                },
+                "linkPosts": {
+                    "type": "bool",
+                    "description": "Create a linked WordPress post for entities with a storage handle.",
+                    "of": null,
+                    "values": null,
+                    "nullable": false,
+                    "default": false,
+                    "hasDefault": true
+                }
+            },
+            "entityConfig": {
+                "adminTemplates": {
+                    "type": "bool",
+                    "description": "Override project admin template generation.",
+                    "of": null,
+                    "values": null,
+                    "nullable": true,
+                    "default": null,
+                    "hasDefault": true
+                },
+                "linkPosts": {
+                    "type": "bool",
+                    "description": "Override project post linking.",
+                    "of": null,
+                    "values": null,
+                    "nullable": true,
+                    "default": null,
+                    "hasDefault": true
+                }
+            },
+            "queryConfig": {}
+        }
     }
 }

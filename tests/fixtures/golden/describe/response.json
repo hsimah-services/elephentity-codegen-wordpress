@@ -1,1 +1,86 @@
-{"elephentity":1,"irVersion":"1.1","provides":{"drivers":["wordpress"],"patterns":{"Taxonomy":{"pattern":"Taxonomy","description":"A flat vocabulary of terms, stored as WordPress taxonomy terms rather than a table of the framework's own. A many-to-many edge into an entity using this pattern lives in wp_term_relationships, so the same vocabulary can classify posts of different types without being declared once per type, and a term applies or lifts without moving any row the term itself did not own.\n","requires":{"driver":"wordpress"},"config":{"taxonomy":{"type":"bool","description":"Marks this entity's rows as WordPress taxonomy terms.","default":true}},"fields":{"name":{"type":"string","description":"The term's label. A taxonomy-backed entity has exactly this field \u2014 anything else declared here has nowhere to live in wp_term_taxonomy and is silently dropped at runtime.\n","required":true,"unique":true,"maxLength":200}}}},"storage":{"handle":{"maxLength":20,"pattern":"/^[a-z][a-z0-9_-]*$/"}}}}
+{
+    "elephentity": 1,
+    "irVersion": "1.1",
+    "provides": {
+        "drivers": [
+            "wordpress"
+        ],
+        "patterns": {
+            "Taxonomy": {
+                "pattern": "Taxonomy",
+                "description": "A flat vocabulary of terms, stored as WordPress taxonomy terms rather than a table of the framework's own. A many-to-many edge into an entity using this pattern lives in wp_term_relationships, so the same vocabulary can classify posts of different types without being declared once per type, and a term applies or lifts without moving any row the term itself did not own.\n",
+                "requires": {
+                    "driver": "wordpress"
+                },
+                "config": {
+                    "taxonomy": {
+                        "type": "bool",
+                        "description": "Marks this entity's rows as WordPress taxonomy terms.",
+                        "default": true
+                    }
+                },
+                "fields": {
+                    "name": {
+                        "type": "string",
+                        "description": "The term's label. A taxonomy-backed entity has exactly this field — anything else declared here has nowhere to live in wp_term_taxonomy and is silently dropped at runtime.\n",
+                        "required": true,
+                        "unique": true,
+                        "maxLength": 200
+                    }
+                }
+            }
+        },
+        "storage": {
+            "handle": {
+                "maxLength": 20,
+                "pattern": "/^[a-z][a-z0-9_-]*$/"
+            }
+        },
+        "integrations": {
+            "wordpress": {
+                "description": "WordPress admin views and optional linked posts; entity identity and relationships remain in Elephentity.",
+                "projectConfig": {
+                    "adminTemplates": {
+                        "type": "bool",
+                        "description": "Generate admin list and detail templates.",
+                        "of": null,
+                        "values": null,
+                        "nullable": false,
+                        "default": true,
+                        "hasDefault": true
+                    },
+                    "linkPosts": {
+                        "type": "bool",
+                        "description": "Create a linked WordPress post for entities with a storage handle.",
+                        "of": null,
+                        "values": null,
+                        "nullable": false,
+                        "default": false,
+                        "hasDefault": true
+                    }
+                },
+                "entityConfig": {
+                    "adminTemplates": {
+                        "type": "bool",
+                        "description": "Override project admin template generation.",
+                        "of": null,
+                        "values": null,
+                        "nullable": true,
+                        "default": null,
+                        "hasDefault": true
+                    },
+                    "linkPosts": {
+                        "type": "bool",
+                        "description": "Override project post linking.",
+                        "of": null,
+                        "values": null,
+                        "nullable": true,
+                        "default": null,
+                        "hasDefault": true
+                    }
+                },
+                "queryConfig": {}
+            }
+        }
+    }
+}

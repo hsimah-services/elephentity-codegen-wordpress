@@ -62,7 +62,7 @@ final class GoldenTest extends TestCase
 
         self::assertSame(
             $result['stdout'],
-            (string) json_encode(json_decode($result['stdout'], true, 512, JSON_THROW_ON_ERROR), JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE),
+            (string) json_encode(json_decode($result['stdout'], false, 512, JSON_THROW_ON_ERROR), JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE),
         );
     }
 

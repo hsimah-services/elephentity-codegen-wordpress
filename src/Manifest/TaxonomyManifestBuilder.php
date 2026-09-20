@@ -62,7 +62,7 @@ final readonly class TaxonomyManifestBuilder
         $types = [];
 
         foreach ($schema->entities as $entity) {
-            $handle = 'wordpress' === $entity->storage->driver && !EdgePlanner::isTaxonomy($entity)
+            $handle = WordPressSettings::linked($schema, $entity)
                 ? $entity->storage->handle
                 : null;
 

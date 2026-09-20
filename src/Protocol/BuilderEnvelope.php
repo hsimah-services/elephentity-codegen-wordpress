@@ -159,7 +159,7 @@ final readonly class BuilderEnvelope
      */
     public static function write(array $response): string
     {
-        $json = json_encode($response, JSON_UNESCAPED_SLASHES);
+        $json = json_encode($response, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
 
         if (false === $json) {
             throw new WireException('Could not encode the response: ' . json_last_error_msg());

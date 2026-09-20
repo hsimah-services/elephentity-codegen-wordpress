@@ -69,3 +69,85 @@ fn nullable_ir_members_still_require_their_keys() {
     assert!(!output.status.success());
     assert!(output.stdout.is_empty());
 }
+
+fn settings_request() -> Value {
+    json!({"elephentity":1,"irVersion":"1.1","schema":{
+        "project":{"name":"Demo","driver":"wordpress","sourceFile":"project.yml"},
+        "entities":{"Item":{"name":"Item","sourceFile":"item.yml","storage":{"driver":"wordpress","table":"item","handle":"item"}},
+        "Owner":{"name":"Owner","sourceFile":"owner.yml","storage":{"driver":"wordpress","table":"owner","handle":"owner"},"config":{"account":true}}}
+    }})
+}
+fn generated(request: &Value) -> Value {
+    let output = invoke(request);
+    assert!(
+        output.status.success(),
+        "{}",
+        String::from_utf8_lossy(&output.stderr)
+    );
+    serde_json::from_slice(&output.stdout).unwrap()
+}
+fn body(response: &Value, path: &str) -> String {
+    response["files"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .find(|f| f["path"] == path)
+        .unwrap()["body"]
+        .as_str()
+        .unwrap()
+        .into()
+}
+#[test]
+fn admin_defaults_on_and_posts_default_off() {
+    let result = generated(&settings_request());
+    assert_eq!(result["errors"], json!([]));
+    assert!(body(&result, "admin-pages.php").contains("'Item'"));
+    assert!(!body(&result, "admin-pages.php").contains("'Owner'"));
+    assert!(body(&result, "admin/Item/list.php").contains("$view->listing"));
+    assert!(body(&result, "admin/Item/detail.php").contains("$view->detail"));
+    assert!(!body(&result, "storage-manifest.php").contains("wp_post_id"));
+    assert!(!body(&result, "post-types.php").contains("'item'"));
+}
+#[test]
+fn posts_and_templates_are_independent_and_entity_settings_override_project() {
+    let mut request = settings_request();
+    request["schema"]["project"]["integrations"] =
+        json!({"wordpress":{"linkPosts":true,"adminTemplates":false}});
+    let result = generated(&request);
+    assert!(body(&result, "storage-manifest.php").contains("'wp_post_id' => new Column"));
+    assert!(body(&result, "storage-manifest.php").contains("'Item' => 'item'"));
+    assert!(body(&result, "post-types.php").contains("'show_ui' => true"));
+    assert_eq!(body(&result, "admin-pages.php"), "return [];\n");
+    request["schema"]["entities"]["Item"]["integrations"] =
+        json!({"wordpress":{"adminTemplates":true,"linkPosts":null}});
+    let result = generated(&request);
+    assert!(body(&result, "post-types.php").contains("'show_ui' => false"));
+    assert!(body(&result, "post-types.php").contains("'show_in_menu' => false"));
+    request["schema"]["entities"]["Item"]["integrations"]["wordpress"]["linkPosts"] = json!(false);
+    let result = generated(&request);
+    assert!(!body(&result, "storage-manifest.php").contains("wp_post_id"));
+    assert!(!body(&result, "post-types.php").contains("'item'"));
+    assert!(body(&result, "admin-pages.php").contains("'Item'"));
+}
+#[test]
+fn linking_rejects_collision_with_an_entity_field() {
+    let mut request = settings_request();
+    request["schema"]["project"]["integrations"] = json!({"wordpress":{"linkPosts":true}});
+    request["schema"]["entities"]["Item"]["fields"] = json!({"wpPostId":{"name":"wpPostId","type":{"primitive":"id","declaredType":null},"origin":{"pattern":null,"file":"item.yml"}}});
+    let result = generated(&request);
+    assert!(result["files"].as_array().unwrap().is_empty());
+    assert!(result["errors"][0].as_str().unwrap().contains("wp_post_id"));
+}
+
+#[test]
+fn explicitly_linked_entities_require_a_post_type_handle() {
+    let mut request = settings_request();
+    request["schema"]["entities"]["Item"]["storage"]["handle"] = Value::Null;
+    request["schema"]["entities"]["Item"]["integrations"] = json!({"wordpress":{"linkPosts":true}});
+    let result = generated(&request);
+    assert_eq!(result["files"], json!([]));
+    assert!(result["errors"][0]
+        .as_str()
+        .unwrap()
+        .contains("storage.handle"));
+}

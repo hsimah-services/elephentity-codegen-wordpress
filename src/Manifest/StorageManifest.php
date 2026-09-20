@@ -29,6 +29,7 @@ final readonly class StorageManifest
      * @param array<string, TableSchema>   $joinTables Keyed by table name.
      * @param array<string, string>            $taxonomies         Entity name => taxonomy slug.
      * @param array<string, TaxonomyPlacement> $taxonomyPlacements Keyed by "Entity.edge".
+     * @param array<string, string> $posts Entity => linked post type.
      * @param array<string, AccountFields>      $accounts Keyed by entity name.
      */
     public function __construct(
@@ -44,6 +45,7 @@ final readonly class StorageManifest
         public array $taxonomies = [],
         public array $taxonomyPlacements = [],
         public array $accounts = [],
+        public array $posts = [],
     ) {
     }
 
@@ -133,6 +135,6 @@ final readonly class StorageManifest
             );
         }
 
-        return new self($tables, $placements, $this->columns, $joinTables, $this->taxonomies, $this->taxonomyPlacements, $this->accounts);
+        return new self($tables, $placements, $this->columns, $joinTables, $this->taxonomies, $this->taxonomyPlacements, $this->accounts, $this->posts);
     }
 }

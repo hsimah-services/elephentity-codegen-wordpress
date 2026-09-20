@@ -3,7 +3,7 @@ use std::collections::BTreeMap;
 fn configured<'a>(e: &'a Value, k: &str, default: &'a Value) -> &'a Value {
     e["config"].get(k).unwrap_or(default)
 }
-fn humanise(n: &str) -> String {
+pub(crate) fn humanise(n: &str) -> String {
     n.chars()
         .enumerate()
         .map(|(i, c)| {
@@ -17,7 +17,7 @@ fn humanise(n: &str) -> String {
         .trim()
         .into()
 }
-fn plural(s: &str) -> String {
+pub(crate) fn plural(s: &str) -> String {
     let lower = s.to_ascii_lowercase();
     if ["s", "x", "z", "ch", "sh"]
         .iter()
@@ -33,7 +33,7 @@ fn plural(s: &str) -> String {
         format!("{s}s")
     }
 }
-fn render(v: &Value, depth: usize) -> String {
+pub(crate) fn render(v: &Value, depth: usize) -> String {
     let entries: Vec<(String, &Value)> = match v {
         Value::Object(m) => m.iter().map(|(k, v)| (q(k), v)).collect(),
         Value::Array(a) => a
@@ -72,10 +72,7 @@ pub fn generate(schema: &Value, tax: bool) -> String {
             if !taxonomy(e) {
                 continue;
             }
-        } else if e["storage"]["driver"] != "wordpress"
-            || e["storage"]["handle"].is_null()
-            || taxonomy(e)
-        {
+        } else if !linked(schema, e) {
             continue;
         }
         let handle = s(&e["storage"]["handle"]);
@@ -96,7 +93,7 @@ pub fn generate(schema: &Value, tax: bool) -> String {
             let hierarchical = b(configured(e, "hierarchical", &no));
             let mut objects = vec![];
             for source in vals(&schema["entities"]) {
-                let handle = if source["storage"]["driver"] == "wordpress" && !taxonomy(source) {
+                let handle = if linked(schema, source) {
                     source["storage"]["handle"].as_str()
                 } else {
                     None
@@ -111,11 +108,13 @@ pub fn generate(schema: &Value, tax: bool) -> String {
             }
             json!({"labels":{"name":plural,"singular_name":singular,"search_items":format!("Search {plural}"),"all_items":format!("All {plural}"),"edit_item":format!("Edit {singular}"),"add_new_item":format!("Add New {singular}"),"new_item_name":format!("New {singular} Name")},"description":description,"public":public,"publicly_queryable":public,"hierarchical":hierarchical,"show_ui":admin,"show_admin_column":admin,"show_in_rest":rest,"object_type":objects})
         } else {
+            let admin = admin && !admin_enabled(schema, e);
             let public = e["config"]["visibility"] == "public";
             let menu = configured(e, "adminMenu", &null)
                 .as_str()
                 .map(|s| json!(s))
                 .unwrap_or(json!(admin));
+            let menu = if admin { menu } else { json!(false) };
             let supports = list(&e["config"]["supports"])
                 .into_iter()
                 .filter_map(Value::as_str)

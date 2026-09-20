@@ -43,7 +43,7 @@ final readonly class PostTypeManifestBuilder
         foreach ($schema->entities as $entity) {
             $handle = $entity->storage->handle;
 
-            if ('wordpress' !== $entity->storage->driver || null === $handle) {
+            if (!WordPressSettings::linked($schema, $entity) || null === $handle) {
                 continue;
             }
 
@@ -55,7 +55,7 @@ final readonly class PostTypeManifestBuilder
 
             $public = 'public' === $entity->configured('visibility', 'private');
             $adminMenu = $entity->configured('adminMenu');
-            $showInAdmin = true === $entity->configured('showInAdmin', true);
+            $showInAdmin = true === $entity->configured('showInAdmin', true) && !WordPressSettings::admin($schema, $entity);
 
             $types[$handle] = [
                 'labels' => $this->labels($entity),
@@ -64,7 +64,7 @@ final readonly class PostTypeManifestBuilder
                 'publicly_queryable' => $public,
                 'exclude_from_search' => !$public,
                 'show_ui' => $showInAdmin,
-                'show_in_menu' => is_string($adminMenu) ? $adminMenu : $showInAdmin,
+                'show_in_menu' => $showInAdmin && is_string($adminMenu) ? $adminMenu : $showInAdmin,
                 'show_in_rest' => true === $entity->configured('showInRest', false),
                 'capability_type' => $entity->configured('capabilityType', 'post'),
                 'supports' => $this->supports($entity),
