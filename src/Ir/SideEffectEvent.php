@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Eleph\Gen\WordPress\Ir;
 
-enum TriggerEvent: string
+enum SideEffectEvent: string
 {
     case Create = 'create';
     case Update = 'update';

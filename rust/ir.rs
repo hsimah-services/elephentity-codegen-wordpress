@@ -1,4 +1,4 @@
-//! Wire IR 1.1. Types are owned by this builder, independently of the compiler.
+//! Wire IR 1.2. Types are owned by this builder, independently of the compiler.
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 #[derive(Debug, Clone, Serialize)]
@@ -78,7 +78,7 @@ pub enum Managed {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub enum TriggerEvent {
+pub enum SideEffectEvent {
     #[serde(rename = "create")]
     Create,
     #[serde(rename = "update")]
@@ -88,7 +88,7 @@ pub enum TriggerEvent {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, Default)]
-pub enum TriggerPhase {
+pub enum SideEffectPhase {
     #[default]
     #[serde(rename = "preCommit")]
     PreCommit,
@@ -166,8 +166,8 @@ pub struct EntityDefinition {
     #[serde(rename = "actions")]
     pub actions: Map<ActionDefinition>,
     #[serde(default)]
-    #[serde(rename = "triggers")]
-    pub triggers: Map<TriggerDefinition>,
+    #[serde(rename = "sideEffects")]
+    pub side_effects: Map<SideEffectDefinition>,
     #[serde(default)]
     #[serde(rename = "config")]
     pub config: Map<Value>,
@@ -385,16 +385,16 @@ pub struct ReturnDefinition {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct TriggerDefinition {
+pub struct SideEffectDefinition {
     #[serde(rename = "name")]
     pub name: String,
     #[serde(rename = "events")]
-    pub events: Vec<TriggerEvent>,
+    pub events: Vec<SideEffectEvent>,
     #[serde(rename = "origin")]
     pub origin: Origin,
     #[serde(default)]
     #[serde(rename = "phase")]
-    pub phase: TriggerPhase,
+    pub phase: SideEffectPhase,
     #[serde(default)]
     #[serde(rename = "description")]
     pub description: Option<String>,
@@ -441,7 +441,7 @@ pub fn decode(value: &Value) -> Result<Value, String> {
     serde_json::to_value(schema).map_err(|e| e.to_string())
 }
 
-// Nullable does not mean optional: these keys are required by IR 1.1 constructors.
+// Nullable does not mean optional: these keys are required by IR 1.2 constructors.
 fn required_nullable<'de, D, T>(deserializer: D) -> Result<Option<T>, D::Error>
 where
     D: serde::Deserializer<'de>,

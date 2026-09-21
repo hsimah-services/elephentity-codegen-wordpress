@@ -1,6 +1,6 @@
 {
   "elephentity": 1,
-  "irVersion": "1.1",
+  "irVersion": "1.2",
   "request": "generate",
   "target": "wordpress",
   "config": {},
@@ -58,7 +58,7 @@
         "edges": {},
         "queries": {},
         "actions": {},
-        "triggers": {},
+        "sideEffects": {},
         "config": {},
         "integrations": {
           "wpgraphql": {
@@ -128,7 +128,7 @@
         },
         "queries": {},
         "actions": {},
-        "triggers": {},
+        "sideEffects": {},
         "config": {},
         "integrations": {
           "wpgraphql": {
@@ -556,7 +556,7 @@
             "description": null
           }
         },
-        "triggers": {
+        "sideEffects": {
           "audit": {
             "name": "audit",
             "events": [
@@ -673,7 +673,7 @@
         "edges": {},
         "queries": {},
         "actions": {},
-        "triggers": {},
+        "sideEffects": {},
         "config": {},
         "integrations": {
           "wpgraphql": {

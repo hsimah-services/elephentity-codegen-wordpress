@@ -66,14 +66,14 @@ fn admin_enabled(schema: &Value, e: &Value) -> bool {
         && e["config"]["showInAdmin"].as_bool().unwrap_or(true)
 }
 fn response(files: Vec<Value>, errors: Vec<String>) -> Value {
-    json!({"elephentity":1,"irVersion":"1.1","headerStyle":"php","extensions":["php"],"files":files,"errors":errors})
+    json!({"elephentity":1,"irVersion":"1.2","headerStyle":"php","extensions":["php"],"files":files,"errors":errors})
 }
 fn run(v: &Value) -> Result<Value> {
     if v["elephentity"].as_u64() != Some(1) {
         return Err("Protocol version mismatch: this builder speaks 1.".into());
     }
-    if v["irVersion"] != "1.1" {
-        return Err("IR version mismatch: this builder speaks 1.1.".into());
+    if v["irVersion"] != "1.2" {
+        return Err("IR version mismatch: this builder speaks 1.2.".into());
     }
     let kind = match v.get("request") {
         None | Some(Value::Null) => "generate",
@@ -87,7 +87,7 @@ fn run(v: &Value) -> Result<Value> {
     match kind {
         "describe" => {
             return Ok(
-                json!({"elephentity":1,"irVersion":"1.1","provides":serde_json::from_str::<Value>(include_str!("provides.json")).map_err(|e|e.to_string())?}),
+                json!({"elephentity":1,"irVersion":"1.2","provides":serde_json::from_str::<Value>(include_str!("provides.json")).map_err(|e|e.to_string())?}),
             )
         }
         "generate" => (),
