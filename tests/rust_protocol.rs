@@ -42,8 +42,8 @@ fn golden_responses() {
 fn rejects_unsupported_versions_and_malformed_schema() {
     for request in [
         json!({"elephentity":1,"irVersion":"99","request":"describe"}),
-        json!({"elephentity":2,"irVersion":"1.1","request":"describe"}),
-        json!({"elephentity":1,"irVersion":"1.1","target":"test","outputDirectory":"out","schema":{"project":{}}}),
+        json!({"elephentity":2,"irVersion":"1.2","request":"describe"}),
+        json!({"elephentity":1,"irVersion":"1.2","target":"test","outputDirectory":"out","schema":{"project":{}}}),
     ] {
         let output = invoke(&request);
         assert!(!output.status.success());
@@ -55,7 +55,7 @@ fn rejects_unsupported_versions_and_malformed_schema() {
 #[test]
 fn nullable_ir_members_still_require_their_keys() {
     let mut request = json!({
-        "elephentity":1,"irVersion":"1.1","target":"test","outputDirectory":"out",
+        "elephentity":1,"irVersion":"1.2","target":"test","outputDirectory":"out",
         "config":{"namespace":"Example","typeNamespace":"ExampleType"},
         "schema":{"project":{"name":"Test","driver":"wordpress","sourceFile":"project.yml"},
         "entities":{"Item":{"name":"Item","storage":{"driver":"wordpress","table":"item"},"sourceFile":"item.yml",
@@ -71,7 +71,7 @@ fn nullable_ir_members_still_require_their_keys() {
 }
 
 fn settings_request() -> Value {
-    json!({"elephentity":1,"irVersion":"1.1","schema":{
+    json!({"elephentity":1,"irVersion":"1.2","schema":{
         "project":{"name":"Demo","driver":"wordpress","sourceFile":"project.yml"},
         "entities":{"Item":{"name":"Item","sourceFile":"item.yml","storage":{"driver":"wordpress","table":"item","handle":"item"}},
         "Owner":{"name":"Owner","sourceFile":"owner.yml","storage":{"driver":"wordpress","table":"owner","handle":"owner"},"config":{"account":true}}}

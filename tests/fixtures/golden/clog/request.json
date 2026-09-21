@@ -1,6 +1,6 @@
 {
     "elephentity": 1,
-    "irVersion": "1.1",
+    "irVersion": "1.2",
     "request": "generate",
     "target": "wordpress",
     "config": {},
@@ -223,7 +223,7 @@
                 },
                 "queries": {},
                 "actions": {},
-                "triggers": {
+                "sideEffects": {
                     "siteAvailability": {
                         "name": "siteAvailability",
                         "events": [
@@ -505,7 +505,7 @@
                         "description": "Retire an item from the catalogue. Clears the barcode so a scan stops resolving to it; the item row itself stays, since existing inventory entries still point at it.\n"
                     }
                 },
-                "triggers": {},
+                "sideEffects": {},
                 "config": {
                     "account": false,
                     "adminMenu": "clog",
@@ -671,7 +671,7 @@
                 },
                 "queries": {},
                 "actions": {},
-                "triggers": {},
+                "sideEffects": {},
                 "config": {
                     "account": false,
                     "adminMenu": "clog",
@@ -745,7 +745,7 @@
                 "edges": {},
                 "queries": {},
                 "actions": {},
-                "triggers": {},
+                "sideEffects": {},
                 "config": {
                     "taxonomy": true
                 },
@@ -872,7 +872,7 @@
                 "edges": {},
                 "queries": {},
                 "actions": {},
-                "triggers": {},
+                "sideEffects": {},
                 "config": {
                     "account": true,
                     "adminMenu": null,

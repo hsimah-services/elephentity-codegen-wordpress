@@ -1,6 +1,6 @@
 {
     "elephentity": 1,
-    "irVersion": "1.1",
+    "irVersion": "1.2",
     "provides": {
         "drivers": [
             "wordpress"
