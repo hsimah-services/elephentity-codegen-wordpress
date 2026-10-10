@@ -151,3 +151,37 @@ fn explicitly_linked_entities_require_a_post_type_handle() {
         .unwrap()
         .contains("storage.handle"));
 }
+
+#[test]
+fn join_tables_cannot_replace_entities_or_other_edges() {
+    let original: Value =
+        serde_json::from_str(include_str!("fixtures/golden/relations/request.json")).unwrap();
+    for other_edge in [false, true] {
+        let mut request = original.clone();
+        request["schema"]["entities"]["Post"]["storage"]["table"] = json!("post");
+        request["schema"]["entities"]["Post"]["edges"]["tags"]["name"] = json!("fooBar");
+        let second_owner = if other_edge {
+            let mut edge = request["schema"]["entities"]["Post"]["edges"]["tags"].clone();
+            edge["name"] = json!("foo_bar");
+            request["schema"]["entities"]["Post"]["edges"]["foo_bar"] = edge;
+            "Post.foo_bar"
+        } else {
+            request["schema"]["entities"]["Author"]["storage"]["table"] = json!("post_foo_bar");
+            "Author"
+        };
+        let output = invoke(&request);
+        assert!(
+            output.status.success(),
+            "{}",
+            String::from_utf8_lossy(&output.stderr)
+        );
+        let response: Value = serde_json::from_slice(&output.stdout).unwrap();
+        assert_eq!(response["files"], json!([]));
+        let errors = response["errors"].as_array().unwrap();
+        assert_eq!(errors.len(), 1);
+        let error = errors[0].as_str().unwrap();
+        for owner in ["Post.fooBar", second_owner, "post_foo_bar"] {
+            assert!(error.contains(owner), "{error}");
+        }
+    }
+}
