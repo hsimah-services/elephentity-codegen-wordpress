@@ -8,7 +8,7 @@
         "patterns": {
             "Taxonomy": {
                 "pattern": "Taxonomy",
-                "description": "A flat vocabulary of terms, stored as WordPress taxonomy terms rather than a table of the framework's own. A many-to-many edge into an entity using this pattern lives in wp_term_relationships, so the same vocabulary can classify posts of different types without being declared once per type, and a term applies or lifts without moving any row the term itself did not own.\n",
+                "description": "A flat vocabulary of terms, stored as WordPress taxonomy terms rather than a table of the framework's own. Domain edges into this vocabulary use their own columns or join tables, so different entities and edges cannot share native WordPress object IDs.\n",
                 "requires": {
                     "driver": "wordpress"
                 },
