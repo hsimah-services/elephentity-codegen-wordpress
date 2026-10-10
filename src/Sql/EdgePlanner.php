@@ -6,7 +6,6 @@ namespace Eleph\Gen\WordPress\Sql;
 
 use Eleph\Gen\WordPress\Ir\EntityDefinition;
 use Eleph\Gen\WordPress\Ir\Schema;
-use Eleph\Gen\WordPress\Storage\RelationKind;
 use Eleph\Gen\WordPress\Taxonomy\TaxonomyPlacement;
 
 /**
@@ -17,9 +16,7 @@ use Eleph\Gen\WordPress\Taxonomy\TaxonomyPlacement;
  * table. If the framework can work it out, letting a human choose is a chance for two
  * entities to disagree.
  *
- * A many-to-many edge pointing at a taxonomy-backed entity is the one relation this
- * skips entirely — see `planTaxonomies()`. There is no column or join table for it to
- * place; `wp_term_relationships` already is one.
+ * Taxonomy relationships use domain-owned columns or join tables, just like ordinary edges.
  */
 final readonly class EdgePlanner
 {
@@ -47,10 +44,6 @@ final readonly class EdgePlanner
                 // has to load the spec compiler to know what a relation is.
                 $relation = $edge->relation()->forStorage();
                 $key = $entity->name . '.' . $edge->name;
-
-                if (RelationKind::ManyToMany === $relation && self::isTaxonomy($target)) {
-                    continue;
-                }
 
                 if ($relation->needsJoinTable()) {
                     // A self-referencing edge (Person.friends -> Person) would otherwise
@@ -101,41 +94,13 @@ final readonly class EdgePlanner
     }
 
     /**
-     * The many-to-many edges `plan()` skipped, because their target is a term rather
-     * than a row in a table it could place a column or join table against.
+     * Legacy native relationships are no longer generated; domain edges use plan().
      *
      * @return array<string, TaxonomyPlacement> Keyed by "Entity.edge".
      */
     public function planTaxonomies(Schema $schema): array
     {
-        $placements = [];
-
-        foreach ($schema->entities as $entity) {
-            foreach ($entity->edges as $edge) {
-                $target = $schema->entity($edge->to);
-
-                if (null === $target || !self::isTaxonomy($target)) {
-                    continue;
-                }
-
-                if (RelationKind::ManyToMany !== $edge->relation()->forStorage()) {
-                    // Not the shape a term relationship can express. Falling through to
-                    // plan() means it gets an ordinary placement against a table the
-                    // target does not have — a spec error this planner has no way to
-                    // report, so it is left to surface where the table is missing.
-                    continue;
-                }
-
-                $placements[$entity->name . '.' . $edge->name] = new TaxonomyPlacement(
-                    entity: $entity->name,
-                    edge: $edge->name,
-                    target: $target->name,
-                    taxonomy: (string) $target->storage->handle,
-                );
-            }
-        }
-
-        return $placements;
+        return [];
     }
 
     /**

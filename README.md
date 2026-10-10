@@ -151,3 +151,5 @@ by disabling generation; review the migration plan when changing these settings.
 Deploy the updated WordPress runtime with the generated files: older runtimes do
 not support the new manifest argument or admin classes. Clog demonstrates default
 unlinked records and an Item entity that opts into linked posts.
+
+Domain relationships to taxonomy-backed entities use ordinary foreign-key columns or edge-specific join tables. Native term APIs still own taxonomy entity CRUD; domain edges never use `wp_term_relationships`. Regenerate the WordPress manifest and rebuild alpha storage when upgrading from shared native relationships; no legacy-link migration is provided.

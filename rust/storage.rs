@@ -97,7 +97,7 @@ pub fn generate(schema: &Value) -> Result<String> {
     let mut tables: BTreeMap<String, Table> = BTreeMap::new();
     let mut owners: BTreeMap<String, String> = BTreeMap::new();
     let mut placements = vec![];
-    let mut tax_places = vec![];
+
     for e in &entities {
         let en = s(&e["name"]);
         let table = s(&e["storage"]["table"]);
@@ -166,10 +166,6 @@ pub fn generate(schema: &Value) -> Result<String> {
             } else {
                 "ManyToMany"
             };
-            if relation == "ManyToMany" && taxonomy(target) {
-                tax_places.push((format!("{en}.{name}"),format!("new TaxonomyPlacement(\n            {},\n            {},\n            {},\n            {},\n        )",q(en),q(name),q(to),q(s(&target["storage"]["handle"])))));
-                continue;
-            }
             let tt = s(&target["storage"]["table"]);
             let (pt, local, remote) = if relation == "ManyToMany" {
                 (
@@ -320,7 +316,7 @@ pub fn generate(schema: &Value) -> Result<String> {
         ("columns", columns.into_iter().collect()),
         ("joinTables", join_tables),
         ("taxonomies", taxonomies.into_iter().collect()),
-        ("taxonomyPlacements", tax_places),
+        ("taxonomyPlacements", vec![]),
         ("accounts", accounts.into_iter().collect()),
         ("posts", posts.into_iter().collect()),
     ] {

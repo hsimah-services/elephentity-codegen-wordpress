@@ -185,3 +185,33 @@ fn join_tables_cannot_replace_entities_or_other_edges() {
         }
     }
 }
+
+#[test]
+fn taxonomy_edges_get_distinct_domain_join_tables() {
+    let mut request: Value =
+        serde_json::from_str(include_str!("fixtures/golden/clog/request.json")).unwrap();
+    let mut edge = request["schema"]["entities"]["Location"]["edges"]["sites"].clone();
+    edge["name"] = json!("otherSites");
+    request["schema"]["entities"]["Location"]["edges"]["otherSites"] = edge;
+    let response = generated(&request);
+    assert_eq!(response["errors"], json!([]));
+    let body = response["files"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .find(|f| f["path"] == "storage-manifest.php")
+        .unwrap()["body"]
+        .as_str()
+        .unwrap();
+    for table in [
+        "clog_inventory_site",
+        "clog_location_sites",
+        "clog_location_other_sites",
+    ] {
+        assert!(
+            body.contains(&format!("'{table}' => new TableSchema")),
+            "{table}"
+        );
+    }
+    assert!(!body.contains("new TaxonomyPlacement("));
+}
