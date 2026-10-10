@@ -95,6 +95,7 @@ fn table_expr(t: &Table) -> String {
 pub fn generate(schema: &Value) -> Result<String> {
     let entities = vals(&schema["entities"]);
     let mut tables: BTreeMap<String, Table> = BTreeMap::new();
+    let mut owners: BTreeMap<String, String> = BTreeMap::new();
     let mut placements = vec![];
     let mut tax_places = vec![];
     for e in &entities {
@@ -136,6 +137,12 @@ pub fn generate(schema: &Value) -> Result<String> {
                     t.indexes
                         .push(index(table, &n, std::slice::from_ref(&n), b(&f["unique"])));
                 }
+            }
+            let owner = format!("entity {en}");
+            if let Some(previous) = owners.insert(table.into(), owner.clone()) {
+                return Err(format!(
+                    "Physical table {table:?} is claimed by {previous} and {owner}."
+                ));
             }
             tables.insert(table.into(), t);
         }
@@ -197,6 +204,13 @@ pub fn generate(schema: &Value) -> Result<String> {
     }
     for p in &placements {
         if let Some(right) = &p.remote {
+            let owner = format!("edge {}.{}", p.entity, p.edge);
+            if let Some(previous) = owners.insert(p.table.clone(), owner.clone()) {
+                return Err(format!(
+                    "Physical table {:?} is claimed by {previous} and {owner}.",
+                    p.table
+                ));
+            }
             let left = &p.local;
             let mut columns = vec![(left.clone(), column(left, "BIGINT UNSIGNED", false, false))];
             if left == right {
